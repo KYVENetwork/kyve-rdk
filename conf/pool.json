@@ -1,0 +1,8 @@
+{
+  "runtime": "my-kyve-runtime",
+  "start_key": "0",
+  "upload_interval": "60",
+  "operating_cost": "2500000000",
+  "max_bundle_size": "10",
+  "version": "0.0.0"
+}

@@ -1,0 +1,40 @@
+{
+  "name": "my-kyve-runtime",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "build": "rimraf dist && tsc",
+    "build:binaries": "yarn build && rimraf out && pkg --no-bytecode --public-packages '*' --output out/kyve package.json && node ../../common/core/dist/src/scripts/checksum.js",
+    "start": "node ./dist/src/index.js",
+    "format": "prettier --write ."
+  },
+  "bin": "./dist/src/index.js",
+  "pkg": {
+    "scripts": "./dist/src/index.js",
+    "assets": [
+      "../../node_modules/classic-level/**/*"
+    ],
+    "targets": [
+      "latest-linux-x64",
+      "latest-linux-arm64",
+      "latest-macos-x64"
+    ],
+    "outputPath": "out"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "dependencies": {
+    "@kyve/core-beta": "1.22.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.0",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.4",
+    "@types/jest": "^28.1.7",
+    "jest": "^28.1.3",
+    "ts-jest": "^28.0.8"
+  }
+}
