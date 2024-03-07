@@ -34,7 +34,7 @@ class DataItem(betterproto.Message):
     key: str = betterproto.string_field(1)
     """The key of the data item"""
 
-    value: str = betterproto.string_field(2)
+    value: bytes = betterproto.bytes_field(2)
     """The value of the data item"""
 
 
