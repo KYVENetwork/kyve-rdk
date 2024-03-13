@@ -9,12 +9,24 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Create a release PR
-  create-release-pr:
-    name: "Create release PR"
+  release:
+    name: "Release"
     runs-on: ubuntu-latest
+    outputs:
+      kysor-released: ${{ steps.release.outputs['tools/kysor--release_created'] }}
+      kysor-path: ${{ steps.release.outputs['tools/kysor--path'] }}
+      kysor-version: ${{ steps.release.outputs['tools/kysor--version'] }}
+      kysor-tag-name: ${{ steps.release.outputs['tools/kysor--tag_name'] }}
     steps:
       - uses: google-github-actions/release-please-action@v4
-        with:
-          token: ${{ secrets.RDK_ACTION }}
-          skip-github-release: true
+        id: release
+
+  release-kysor:
+    name: "Release kysor"
+    needs: release
+    if: ${{ needs.release.outputs.kysor-released }}
+    uses: ./.github/workflows/releases_go.yml
+    with:
+      working-dir: ${{ needs.release.outputs.kysor-path }}
+      version: ${{ needs.release.outputs.kysor-version }}
+      tag-name: ${{ needs.release.outputs.kysor-tag-name }}

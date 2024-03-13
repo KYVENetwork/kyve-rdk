@@ -6,73 +6,35 @@ on:
       working-dir:
         required: true
         type: string
+      version:
+        required: true
+        type: string
+      tag-name:
+        required: true
+        type: string
 
 jobs:
   release-go-module:
-    name: "Release go module"
+    name: "Release ${{ inputs.tag-name }}"
     runs-on: ubuntu-latest
     steps:
       # Checkout the repository
-      - name: Checkout the repository
+      - name: Check out repository code
         uses: actions/checkout@v4
-        with:
-          ref: main
-      # Install nodejs
-      - name: Install nodejs
-        uses: actions/setup-node@v4
-      # Set working dir as env var
-      - name: Set working directory
-        run: echo "WORKING_DIR=${{ inputs.working-dir }}" >> $GITHUB_ENV
-      # Get version and save it to an environment variable
-      - name: Get ${{ inputs.working-dir }} version
-        run: echo "VERSION=$(cat .release-please-manifest.json | jq -r '.["'$WORKING_DIR'"]')" >> $GITHUB_ENV
       # Setup Golang from working directory
       - name: 🐿 Setup Golang
         uses: actions/setup-go@v4
         with:
-          go-version-file: ${{ inputs.working-dir }}/go.mod
-          cache-dependency-path: ${{ inputs.working-dir }}/go.sum
+          go-version-file: ${{ inputs.working-dir  }}/go.mod
+          cache-dependency-path: ${{ inputs.working-dir  }}/go.sum
       # Build
       - name: Build
         run: make release
-        working-directory: ${{ inputs.working-dir }}
+        working-directory: ${{ inputs.working-dir  }}
         env:
-          VERSION: ${{ env.VERSION }}
-      # Generate Release Body
-      - name: Generate Release Body
-        run: npx extract-changelog-release  ${{ github.workspace }}/${{ env.WORKING_DIR }}/CHANGELOG.md > RELEASE_BODY.md
-      # Print release body
-      - name: Print release body
-        run: cat RELEASE_BODY.md
-      # Create new tag
-      - name: Create new tag
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const {VERSION, WORKING_DIR} = process.env          
-            github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `refs/tags/${WORKING_DIR}@${VERSION}`,
-                sha: context.sha
-            })
-      # Publish the Release
-      - name: Publish the Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: RELEASE_BODY.md
-          files: ${{ inputs.working-dir }}/release/*
-          tag_name: ${{ inputs.working-dir }}@${{ env.VERSION }}
-          prerelease: false
+          VERSION: ${{ inputs.version }}
+      # Upload Release Artifact
+      - name: Upload Release Artifact
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Remove `autorelease: pending` label from the pull request
-      - name: Remove the label from the pull request
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          labels: 'autorelease: pending'
-      # Add `autorelease: tagged` label to the pull request
-      - name: Add the label to the pull request
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: 'autorelease: tagged'
+        run: gh release upload ${{ inputs.tag-name }} ${{ inputs.working-dir }}/release/*
