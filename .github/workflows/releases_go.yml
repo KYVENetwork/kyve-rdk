@@ -1,0 +1,40 @@
+name: Create go releases
+
+on:
+  workflow_call:
+    inputs:
+      working-dir:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      tag-name:
+        required: true
+        type: string
+
+jobs:
+  release-go-module:
+    name: "Release ${{ inputs.tag-name }}"
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      # Setup Golang from working directory
+      - name: 🐿 Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: ${{ inputs.working-dir  }}/go.mod
+          cache-dependency-path: ${{ inputs.working-dir  }}/go.sum
+      # Build
+      - name: Build
+        run: make release
+        working-directory: ${{ inputs.working-dir  }}
+        env:
+          VERSION: ${{ inputs.version }}
+      # Upload Release Artifact
+      - name: Upload Release Artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ inputs.tag-name }} ${{ inputs.working-dir }}/release/*

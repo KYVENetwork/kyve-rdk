@@ -11,13 +11,13 @@
 <br/>
 
 <div align="center">
-  <img alt="License: Apache-2.0" src="https://badgen.net/github/license/KYVENetwork/kyvejs?color=green" />
+  <img alt="License: Apache-2.0" src="https://badgen.net/github/license/KYVENetwork/kyve-rdk?color=green" />
 
-  <img alt="License: Apache-2.0" src="https://badgen.net/github/stars/KYVENetwork/kyvejs?color=green" />
+  <img alt="License: Apache-2.0" src="https://badgen.net/github/stars/KYVENetwork/kyve-rdk?color=green" />
 
-  <img alt="License: Apache-2.0" src="https://badgen.net/github/contributors/KYVENetwork/kyvejs?color=green" />
+  <img alt="License: Apache-2.0" src="https://badgen.net/github/contributors/KYVENetwork/kyve-rdk?color=green" />
 
-  <img alt="License: Apache-2.0" src="https://badgen.net/github/releases/KYVENetwork/kyvejs?color=green" />
+  <img alt="License: Apache-2.0" src="https://badgen.net/github/releases/KYVENetwork/kyve-rdk?color=green" />
 </div>
 
 <div align="center">
@@ -34,83 +34,85 @@
 
 <br/>
 
-KYVE, the Web3 data lake solution, is a protocol that enables data providers to standardize, validate, and permanently store blockchain data streams. By leveraging permanent data storage solutions like Arweave, KYVE’s Cosmos SDK chain creates permanent backups and ensures the scalability, immutability, and availability of these resources over time.
+KYVE, a protocol that enables data providers to standardize, validate, and permanently store blockchain data streams, is a solution for Web3 data lakes. 
+For more information check out the [KYVE documentation](https://docs.kyve.network/).
 
 ## Project Overview
 
 **Common:**
 
-- [@kyvejs/types](common/types/README.md) - holds all types for the KYVE application in typescript
-- [@kyvejs/sdk](common/sdk/README.md) - development kit for communicating with the KYVE blockchain
-- [@kyvejs/protocol](common/protocol/README.md) - core functionality for running validators on the KYVE network
+- common/goutils - go utility functions for this repository
+- common/proto - protocol buffer definitions for this repository
+
+**Protocol:**
+
+- [protocol/core](protocol/core/README.md) - core functionality for running validators on the KYVE network
+
+**Runtime:**
+
+- [runtime/tendermint](runtime/tendermint/README.md) - The official KYVE Tendermint sync runtime
+- [runtime/tendermint-ssync](runtime/tendermint-ssync/README.md) - The official KYVE Tendermint state-sync runtime
+- [runtime/tendermint-bsync](runtime/tendermint-bsync/README.md) - The official KYVE Tendermint block sync runtime
 
 **Tools:**
 
-- [@kyvejs/kysor](tools/kysor/README.md) - The Cosmovisor of KYVE
+- [tools/kysor](tools/kysor/README.md) - The Cosmovisor of KYVE
+- [tools/kystrap](tools/kystrap/README.md) - A bootstrap tool for creating new KYVE runtimes
 
-**Integrations:**
+**Test**
+- test/e2e - end-to-end tests for the KYVE protocol and runtimes
 
-- [@kyvejs/tendermint](integrations/tendermint/README.md) - The official KYVE Tendermint sync integration
-- [@kyvejs/tendermint-ssync](integrations/tendermint-ssync/README.md) - The official KYVE Tendermint state-sync integration
-- [@kyvejs/tendermint-bsync](integrations/tendermint-bsync/README.md) - The official KYVE Tendermint block sync integration
+## What is a KYVE integration?
+A KYVE data validator requires an integration to validate and store data. 
 
-## Build Integration Binaries
+An integration consists of the protocol core (client) and the runtime (server).<br>
+The protocol core is responsible to communicate between the KYVE blockchain and the runtime and store data blobs on a storage provider (Arweave).
 
-Clone and checkout repository:
+<img src="assets/protocol-validator.jpg" alt="protocol-validator" width="600"/>
 
+## How to write a KYVE runtime
+
+You can choose to write a runtime in Go, Python, or TypeScript. The following steps will guide you through the process of creating a new runtime.
+
+**Prerequisites:**
+- [Docker](https://docs.docker.com/engine/install/)
+
+**Step 1:** Clone the repository and checkout a new branch
 ```bash
-git clone git@github.com:KYVENetwork/kyvejs.git
-cd kyvejs
+git clone git@github.com:KYVENetwork/kyve-rdk.git
+
+# Checkout a new branch
+# git checkout -b [feat/fix]/runtime/[my-branch-name]
+git checkout -b feat/runtime/fancypants
 ```
 
-Checkout desired version:
-
-```
-git checkout tags/@kyvejs/<integration>@x.x.x -b @kyvejs/<integration>@x.x.x
-```
-
-Example: `git checkout tags/@kyvejs/tendermint-bsync@1.0.0 -b @kyvejs/tendermint-bsync@1.0.0`
-
-Install dependencies and setup project:
-
-```
-yarn setup
-```
-
-Checkout integration and build binaries:
-
-```
-cd integrations/<integration>
-yarn build:binaries
-```
-
-The binaries can then be found in the `/out` folder
-
-## How to contribute
-
-Checkout new branch to implement new features/fixes there
-
+**Step 2:** Run kystrap
 ```bash
-git checkout -b [feat/fix]/[my-branch-name]
+make bootstrap-runtime
 ```
 
-Install dependencies and setup project:
+Follow the instructions to create a new runtime.
+The wizard will create a new folder in `runtime/` with the name you provided.
 
-```bash
-yarn setup
-```
-
-Apply your changes and create a Pull Request to `main`. Once the team has
-reviewed and approved your PR it can be merged and used.
+The new runtime will contain a `README.md` with further instructions on how to get started.
 
 **NOTE**: The usage of [Conventional Commits](https://conventionalcommits.org) is required when creating PRs and committing to this repository
 
 ## How to release
 
-In order to release new changes which got merged into `main` lerna can be used. Lerna will look into every change and create a new release tag if necessary. After the user has approved the new version tags (bumped according to [Semantic Versioning](https://semver.org/)) lerna will push those new tags to `main`, starting the CI/CD pipeline and creating the releases.
+**Step1**: Create a new PR<br>
+Before creating a new release, you need to create a new PR to the `main` branch. The PR should contain the changes you want to release.
 
-Release with lerna:
+**Step2**: Review and merge PR<br>
+The CI pipeline will run some checks and tests on the PR. 
+After the PR is reviewed and merged, the CI pipeline will bump the version, create changelogs and create a new *release-PR*.
 
-```
-yarn lerna version
-```
+**Step3**: Merge the release-PR<br>
+After the *release-PR* is merged, the CI pipeline will create a new release and publish it to the GitHub release page.
+
+**NOTE**: The version bump is done by [Release Please](https://github.com/google-github-actions/release-please-action?tab=readme-ov-file#how-should-i-write-my-commits) with following rules:
+- Commits with `fix:` will trigger a patch release
+- Commits with `feat:` will trigger a minor release
+- Commits with `feat!:`, `fix!:`, `refactor!:`, etc. will trigger a major release (breaking change)
+
+It is recommended to use squash-merge for PRs to keep the commit history clean and to avoid unnecessary version bumps.

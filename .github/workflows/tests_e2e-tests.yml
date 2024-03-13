@@ -1,0 +1,22 @@
+name: e2e tests
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      # Setup Golang
+      - name: 🐿 Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'test/e2e/go.mod'
+          cache-dependency-path: 'test/e2e/go.sum'
+      # Run e2e tests
+      - name: Run e2e tests
+        run: GOMAXPROCS=10 go test -v -timeout 30m ./...
+        working-directory: test/e2e

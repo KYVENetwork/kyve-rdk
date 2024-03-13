@@ -1,0 +1,18 @@
+name: Build docker images check
+
+on:
+  workflow_call:
+
+jobs:
+  build-docker-images:
+    name: 'build docker images'
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.set-env.outputs.docker }}
+    steps:
+      # Checkout the repository
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      # Build docker images
+      - name: Build docker images
+        run: make build-docker-images
