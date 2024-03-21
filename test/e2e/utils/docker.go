@@ -35,7 +35,7 @@ const (
 	// kystrapTemplatesDir is the path to the templates folder
 	kystrapTemplatesDir = rootPath + "tools/kystrap/templates"
 	// kystrapMount is the mount path for the output folder in the kystrap container
-	kystrapMount = "/app/out"
+	kystrapMount = "/app/runtime"
 )
 
 var defaultVersion = "1.0.0-test"

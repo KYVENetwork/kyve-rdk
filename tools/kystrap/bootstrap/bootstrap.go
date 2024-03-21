@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -123,4 +124,63 @@ func CreateRuntime(outputDir string, language types.Language, name string) error
 		// Create file
 		return createFile(path, newPath, data, fileInfo)
 	})
+}
+
+func UpdateReleasePleaseConfig(language types.Language, name string) error {
+	configPath := "release-please-config.json"
+
+	// Read the config file
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+
+	// Parse the JSON content into a map
+	var config map[string]interface{}
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		return err
+	}
+
+	releaseType := ""
+	switch language.StringValue() {
+	case "go":
+		releaseType = "go"
+	case "typescript":
+		releaseType = "node"
+	case "python":
+		releaseType = "python"
+	default:
+		return fmt.Errorf("unsupported language: %s", language.StringValue())
+	}
+
+	// Create a new package
+	packageName := "runtime/" + name
+	newPackage := map[string]interface{}{
+		"release-type": releaseType,
+		"package-name": packageName,
+	}
+
+	// Get the packages map from the config
+	packages, ok := config["packages"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to parse packages")
+	}
+
+	// Add the new package to the packages map
+	packages[packageName] = newPackage
+
+	// Convert the updated Config back to JSON
+	updatedData, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// Write the updated JSON back to the config file
+	err = os.WriteFile(configPath, updatedData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

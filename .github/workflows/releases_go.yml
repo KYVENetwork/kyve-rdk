@@ -2,98 +2,39 @@ name: Create go releases
 
 on:
   workflow_call:
+    inputs:
+      working-dir:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      tag-name:
+        required: true
+        type: string
 
 jobs:
-  prepare:
-    name: 'prepare go releases'
+  release-go-module:
+    name: "Release ${{ inputs.tag-name }}"
     runs-on: ubuntu-latest
-    outputs:
-      output-tags: ${{ steps.set-env.outputs.tags }}
     steps:
       # Checkout the repository
-      - name: Checkout the repository
-        uses: actions/checkout@main
-        with:
-          ref: 'main'
-      # Fetch tags
-      - name: Fetch tags
-        run: git fetch --tags
-      # Collect all directories in tools/ with a Makefile and a release target
-      - name: Collect go module names
-        run: echo "MODULES=$(find tools/ -maxdepth 2 -type f -name 'Makefile' -exec grep -q 'release:' {} \; -print | xargs -n1 dirname | jq --raw-input . | jq --slurp . | jq tostring)" >> $GITHUB_ENV
-      # Set tags if they point to the current commit
-      - name: Set tag
-        run: echo "TAGS=$(git tag --points-at | jq  --raw-input .  | jq --slurp . | jq tostring)" >> $GITHUB_ENV
-      # Output tags that match the go package names
-      - name: Output go tags
-        id: output-tags
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { MODULES, TAGS } = process.env
-            console.log(MODULES)
-            console.log(TAGS)
-            
-            const modules = JSON.parse(JSON.parse(MODULES))
-            const tags = JSON.parse(JSON.parse(TAGS))
-            
-            const selectedTags = tags.filter(it => modules.includes(it.split('@')[0]))
-
-            console.log(selectedTags)
-            return JSON.stringify(JSON.stringify(selectedTags))
-          result-encoding: string
-      # Print vars
-      - name: Print vars
-        run: |
-          echo ${{ steps.output-tags.outputs.result }}
-      # Set tags
-      - name: Set tags
-        id: set-env
-        run: echo "::set-output name=tags::${{steps.output-tags.outputs.result}}"
-
-  release:
-    name: 'release'
-    runs-on: ubuntu-latest
-    needs: prepare
-    if: needs.prepare.outputs.output-tags != '[]'
-    strategy:
-      matrix:
-        tag: ${{fromJSON(needs.prepare.outputs.output-tags)}}
-    steps:
-      # Checkout the repository
-      - name: Checkout the repository
+      - name: Check out repository code
         uses: actions/checkout@v4
-        with:
-          ref: 'main'
-      # Set working directory
-      - name: Set working directory
-        run: echo "WORKING_DIR=tools/$(echo ${{ matrix.tag }} | awk -F'[/@]' '{print $2}' | sed 's/ *$//g')" >> $GITHUB_ENV
-      # Set version
-      - name: Set version
-        run: echo "VERSION=$(echo ${{ matrix.tag }} | awk -F'[/@]' '{print $3}')" >> $GITHUB_ENV
-      # Setup Golang from woring directory
+      # Setup Golang from working directory
       - name: 🐿 Setup Golang
         uses: actions/setup-go@v4
         with:
-          go-version-file: ${{ env.WORKING_DIR }}/go.mod
-          cache-dependency-path: ${{ env.WORKING_DIR }}/go.sum
+          go-version-file: ${{ inputs.working-dir  }}/go.mod
+          cache-dependency-path: ${{ inputs.working-dir  }}/go.sum
       # Build
       - name: Build
         run: make release
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: ${{ inputs.working-dir  }}
         env:
-          VERSION: ${{ env.VERSION }}
-        # TODO: Generate release body
-#      # Generate Release Body
-#      - name: Generate Release Body
-#        run: npx extract-changelog-release  ${{ github.workspace }}/${{env.WORKING_DIR}}/CHANGELOG.md > RELEASE_BODY.md
-      # Publish the Release
-      - name: Publish the Release
-        uses: softprops/action-gh-release@v1
-        with:
-#          body_path: RELEASE_BODY.md
-          files: ${{ env.WORKING_DIR }}/release/*
-          tag_name: ${{ matrix.tag }}
-          prerelease: false
+          VERSION: ${{ inputs.version }}
+      # Upload Release Artifact
+      - name: Upload Release Artifact
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ inputs.tag-name }} ${{ inputs.working-dir }}/release/*

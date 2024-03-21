@@ -1,6 +1,6 @@
 #!/bin/sh
 
-E2ETEST_DIR=${PWD}/test/e2e
+E2ETEST_DIR=test/e2e
 
 # Capture the first argument which will be passed to the e2e test
 arg="$1"
@@ -25,14 +25,15 @@ docker build $E2ETEST_DIR -t e2etest
 # Run docker image in privileged mode (required for docker-in-docker)
 # Use this only for local testing!!!
 docker run \
-    --rm                                     `# Remove container after run` \
-    --privileged                             `# Run in privileged mode` \
-    -d                                       `# Run in detached mode` \
-    --name e2etest                           `# Name the container` \
-    -v ${PWD}/runtime:/mnt/runtime:ro        `# Mount runtime folder` \
-    -v ${PWD}/tools:/tools:ro                `# Mount tools folder` \
-    -v ${PWD}/protocol:/protocol:ro          `# Mount protocol folder` \
-    -v e2etestvol:/var/lib/docker            `# Mount docker volume (to cache images)` \
+    --rm                                                                      `# Remove container after run` \
+    --privileged                                                              `# Run in privileged mode` \
+    -d                                                                        `# Run in detached mode` \
+    --name e2etest                                                            `# Name the container` \
+    -v ${PWD}/runtime:/mnt/runtime:ro                                         `# Mount runtime folder` \
+    -v ${PWD}/tools:/tools:ro                                                 `# Mount tools folder` \
+    -v ${PWD}/protocol:/protocol:ro                                           `# Mount protocol folder` \
+    -v ${PWD}/release-please-config.json:/mnt/release-please-config.json:ro   `# Mount release-pleas-manifest.json` \
+    -v e2etestvol:/var/lib/docker                                             `# Mount docker volume (to cache images)` \
     e2etest
 
 # Check if the docker daemon inside the container is running (it takes a few seconds to start)
@@ -45,10 +46,12 @@ done
 
 # Run e2e tests in docker container
 # Make a copy of runtime folder in the container
+# Make a copy of release-please-config.json in the container
 docker exec -it e2etest sh -c \
   "rm -rf /runtime;
   mkdir /runtime;
   cp -r /mnt/runtime/* /runtime;
+  cp /mnt/release-please-config.json /;
   ./e2etest -test.v -test.parallel 10 -test.timeout 30m $arg" || docker stop e2etest; echo "e2e tests failed!"; exit 1
 
 # Stop docker container

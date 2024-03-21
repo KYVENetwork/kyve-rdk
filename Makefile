@@ -100,12 +100,3 @@ build-docker-images:
 
 %.build-docker-image:
 	@$(MAKE) -C $* docker-image
-
-###############################################################################
-### 							 	Release 						 		###
-###############################################################################
-
-release:
-	@echo "🚀 Creating a new release..."
-	@./create-release.sh
-	@echo "✅ Completed release!"

@@ -100,9 +100,19 @@ The new runtime will contain a `README.md` with further instructions on how to g
 
 ## How to release
 
-New releases are created by merging changes into the `main` branch and running the release script.
-```bash
-make release
-```
-This creates a release.sh script which can be modified before running it.<br>
-After running the script the CI/CD pipeline will be triggered and the new releases will be created.
+**Step1**: Create a new PR<br>
+Before creating a new release, you need to create a new PR to the `main` branch. The PR should contain the changes you want to release.
+
+**Step2**: Review and merge PR<br>
+The CI pipeline will run some checks and tests on the PR. 
+After the PR is reviewed and merged, the CI pipeline will bump the version, create changelogs and create a new *release-PR*.
+
+**Step3**: Merge the release-PR<br>
+After the *release-PR* is merged, the CI pipeline will create a new release and publish it to the GitHub release page.
+
+**NOTE**: The version bump is done by [Release Please](https://github.com/google-github-actions/release-please-action?tab=readme-ov-file#how-should-i-write-my-commits) with following rules:
+- Commits with `fix:` will trigger a patch release
+- Commits with `feat:` will trigger a minor release
+- Commits with `feat!:`, `fix!:`, `refactor!:`, etc. will trigger a major release (breaking change)
+
+It is recommended to use squash-merge for PRs to keep the commit history clean and to avoid unnecessary version bumps.

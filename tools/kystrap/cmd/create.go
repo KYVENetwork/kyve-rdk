@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var regexpAlphaNumericAndDash = regexp.MustCompile(`^[a-zA-Z0-9-]+$`)
+var regexpAlphaNumericAndDash = regexp.MustCompile(`^[a-z0-9-]+$`)
 
 var (
 	flagLanguage = commoncmd.OptionFlag[types.Language]{
@@ -46,7 +46,7 @@ var (
 				return errors.New("name must be at least 3 characters long")
 			}
 			if !regexpAlphaNumericAndDash.MatchString(input) {
-				return errors.New("name must only contain alphanumeric characters and dashes")
+				return errors.New("name must only contain lowercase alphanumeric characters and dashes")
 			}
 			return nil
 		},
@@ -55,7 +55,7 @@ var (
 		Name:         "output",
 		Short:        "o",
 		Usage:        "Output directory for your runtime",
-		DefaultValue: "out",
+		DefaultValue: "runtime",
 	}
 )
 
@@ -103,6 +103,12 @@ func CmdCreateRuntime() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			err = bootstrap.UpdateReleasePleaseConfig(language, name)
+			if err != nil {
+				return err
+			}
+
 			fmt.Printf("✅ Successfully created runtime in `%s`\n", name)
 			return nil
 		},

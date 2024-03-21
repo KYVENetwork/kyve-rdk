@@ -145,7 +145,9 @@ func bootstrapTmpRuntimes(t *testing.T, log *zap.Logger, protocolBuilder *utils.
 
 	g.Expect(err).To(BeNil())
 	for _, tmpFolder := range tmpFolders {
-		g.Expect(tmpFolder.Path).To(BeADirectory(), "There is a problem with creating new runtimes with kystrap")
+		g.Expect(tmpFolder.Path).To(BeADirectory(), fmt.Sprintf(
+			"There is a problem with creating new runtimes with kystrap!\n"+
+				"Could not create runtime in %s", tmpFolder.Path))
 	}
 }
 
