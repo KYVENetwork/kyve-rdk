@@ -9,6 +9,7 @@ API="https://rpc.kyve.network"
 CONFIG='{"network":"kyve-1","rpc":"'$API'"}'
 EXPECTED_SUMMARY="\"$KEY\""
 EXPECTED_NEXT_KEY="\"$(expr $KEY + 1)\""
+THROTTLE_TIME=0.5 # The time to wait between requests (in seconds). Increase this value if you are getting rate-limited or if you get timing issues.
 
 #########################################
 
@@ -57,6 +58,7 @@ EOF
 }
 
 run_test() {
+  sleep $THROTTLE_TIME
   create_entrypoint "$@"
     docker run \
       --rm                                          `# Remove container after run` \

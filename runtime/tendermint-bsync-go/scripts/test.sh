@@ -9,6 +9,7 @@ API="https://rpc.kyve.network"
 CONFIG='{"network":"kyve-1","rpc":"'$API'"}'
 EXPECTED_SUMMARY="\"$KEY\""
 EXPECTED_NEXT_KEY="\"$(expr $KEY + 1)\""
+THROTTLE_TIME=0.5 # The time to wait between requests (in seconds). Increase this value if you are getting rate-limited or if you get timing issues.
 
 #########################################
 
@@ -39,7 +40,6 @@ fi
 docker build --tag kystrap "$KYSTRAP_DIR" || exit 1
 
 # Setup
-rm -rf $TMP_DIR
 mkdir -p $OUTPUT_DIR
 touch $TMP_DIR/data.json
 
@@ -50,8 +50,6 @@ create_entrypoint() {
 
 data=\$(cat /app/data.json)
 
-echo "Request data: \$data"
-
 rm -f /app/output/output.json
 ./kystrap test -y -a $HOST:$PORT $@ || exit 1
 ./kystrap test -y -a $HOST:$PORT -s $@ > /app/output/output.json
@@ -60,8 +58,7 @@ EOF
 }
 
 run_test() {
-  echo "Request data outside container: $(cat $TMP_DIR/data.json)"
-  sleep 0.1
+  sleep $THROTTLE_TIME
   create_entrypoint "$@"
     docker run \
       --rm                                          `# Remove container after run` \
@@ -73,7 +70,6 @@ run_test() {
       -v $OUTPUT_DIR:/app/output                    `# Mount the output.json file` \
       --entrypoint ./entrypoint.sh                  `# Set the entrypoint to entrypoint.sh` \
       kystrap
-  sleep 0.1
 }
 
 test_get_runtime_name() {
