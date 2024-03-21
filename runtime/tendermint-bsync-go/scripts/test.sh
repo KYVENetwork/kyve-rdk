@@ -4,8 +4,8 @@
 #               Variables               #
 #########################################
 # Key, config, and expected values (CHANGE THESE TO MATCH YOUR RUNTIME!!!)
-KEY="3943400"
-API="http://ovh-protocol-1:21016"
+KEY="4943400"
+API="https://rpc.kyve.network"
 CONFIG='{"network":"kyve-1","rpc":"'$API'"}'
 EXPECTED_SUMMARY="\"$KEY\""
 EXPECTED_NEXT_KEY="\"$(expr $KEY + 1)\""
@@ -39,6 +39,7 @@ fi
 docker build --tag kystrap "$KYSTRAP_DIR" || exit 1
 
 # Setup
+rm -rf $TMP_DIR
 mkdir -p $OUTPUT_DIR
 touch $TMP_DIR/data.json
 
@@ -49,6 +50,8 @@ create_entrypoint() {
 
 data=\$(cat /app/data.json)
 
+echo "Request data: \$data"
+
 rm -f /app/output/output.json
 ./kystrap test -y -a $HOST:$PORT $@ || exit 1
 ./kystrap test -y -a $HOST:$PORT -s $@ > /app/output/output.json
@@ -57,6 +60,8 @@ EOF
 }
 
 run_test() {
+  echo "Request data outside container: $(cat $TMP_DIR/data.json)"
+  sleep 0.1
   create_entrypoint "$@"
     docker run \
       --rm                                          `# Remove container after run` \
@@ -68,6 +73,7 @@ run_test() {
       -v $OUTPUT_DIR:/app/output                    `# Mount the output.json file` \
       --entrypoint ./entrypoint.sh                  `# Set the entrypoint to entrypoint.sh` \
       kystrap
+  sleep 0.1
 }
 
 test_get_runtime_name() {
