@@ -4,8 +4,8 @@
 #               Variables               #
 #########################################
 # Key, config, and expected values (CHANGE THESE TO MATCH YOUR RUNTIME!!!)
-KEY="4943400"
-API="https://rpc.kyve.network"
+KEY="3943400"
+API="http://ovh-protocol-1:21016"
 CONFIG='{"network":"kyve-1","rpc":"'$API'"}'
 EXPECTED_SUMMARY="\"$KEY\""
 EXPECTED_NEXT_KEY="\"$(expr $KEY + 1)\""
