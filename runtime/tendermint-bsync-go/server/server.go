@@ -43,7 +43,7 @@ func (t *TendermintBsyncGoServer) GetRuntimeName(ctx context.Context, req *pb.Ge
 
 // GetRuntimeVersion returns the version of the runtime. Example "1.2.0"
 func (t *TendermintBsyncGoServer) GetRuntimeVersion(ctx context.Context, req *pb.GetRuntimeVersionRequest) (*pb.GetRuntimeVersionResponse, error) {
-	return &pb.GetRuntimeVersionResponse{Version: "1.1.4"}, nil
+	return &pb.GetRuntimeVersionResponse{Version: "1.1.8"}, nil
 }
 
 // ValidateSetConfig parses the raw runtime config found on pool, validates it and finally sets
@@ -68,7 +68,7 @@ func (t *TendermintBsyncGoServer) ValidateSetConfig(ctx context.Context, req *pb
 		return nil, status.Error(codes.Internal, "config does not have property 'rpc' defined")
 	}
 
-	if value, exists := os.LookupEnv("KYVEJS_TENDERMINT-BSYNC-GO_RPC"); exists {
+	if value, exists := os.LookupEnv("KYVEJS_TENDERMINT_BSYNC_RPC"); exists {
 		config.Rpc = value
 	}
 

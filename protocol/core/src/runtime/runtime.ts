@@ -110,7 +110,7 @@ export default class GrpcRuntime implements IRuntime {
 
             const responseDataItem: DataItem = {
               key: runtimeResponse.data_item.key,
-              value: JSON.parse(runtimeResponse.data_item.value),
+              value: JSON.parse(Buffer.from(runtimeResponse.data_item.value.buffer).toString()),
             };
             resolve(responseDataItem);
           }
@@ -124,7 +124,7 @@ export default class GrpcRuntime implements IRuntime {
   ): Promise<PrevalidateDataItemResponse> {
     const request_item = {
       key: item.key,
-      value: JSON.stringify(item.value),
+      value: Buffer.from(JSON.stringify(item.value)),
     };
     return new Promise<PrevalidateDataItemResponse>((resolve, reject) => {
       this.grpcClient.prevalidateDataItem(
@@ -149,7 +149,7 @@ export default class GrpcRuntime implements IRuntime {
   async transformDataItem(item: DataItem): Promise<DataItem> {
     const request_item = {
       key: item.key,
-      value: JSON.stringify(item.value),
+      value: Buffer.from(JSON.stringify(item.value)),
     };
     return new Promise<DataItem>((resolve, reject) => {
       this.grpcClient.transformDataItem(
@@ -170,7 +170,7 @@ export default class GrpcRuntime implements IRuntime {
 
             const responseDataItem: DataItem = {
               key: runtimeResponse.transformed_data_item.key,
-              value: JSON.parse(runtimeResponse.transformed_data_item.value),
+              value: JSON.parse(Buffer.from(runtimeResponse.transformed_data_item.value.buffer).toString()),
             };
             resolve(responseDataItem);
           }
@@ -185,11 +185,11 @@ export default class GrpcRuntime implements IRuntime {
   ): Promise<number> {
     const request_proposed_data_item = {
       key: proposedDataItem.key,
-      value: JSON.stringify(proposedDataItem.value),
+      value: Buffer.from(JSON.stringify(proposedDataItem.value)),
     };
     const request_validation_data_item = {
       key: validationDataItem.key,
-      value: JSON.stringify(validationDataItem.value),
+      value: Buffer.from(JSON.stringify(validationDataItem.value)),
     };
     return new Promise<number>((resolve, reject) => {
       this.grpcClient.validateDataItem(
@@ -215,7 +215,7 @@ export default class GrpcRuntime implements IRuntime {
   async summarizeDataBundle(bundle: DataItem[]): Promise<string> {
     const grpcBundle = bundle.map((item) => ({
       key: item.key,
-      value: JSON.stringify(item.value),
+      value: Buffer.from(JSON.stringify(item.value)),
     }));
     return new Promise<string>((resolve, reject) => {
       this.grpcClient.summarizeDataBundle(
