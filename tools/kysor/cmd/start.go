@@ -322,7 +322,7 @@ func buildImages(
 		vers := "0.0.0-local"
 		protocolImage = docker.Image{
 			Path:      options.ProtocolBuildDir,
-			Tags:      []string{fmt.Sprintf("%s/%s:%s", strings.ToLower(kr.name), protocol.name, "local")},
+			Tags:      []string{fmt.Sprintf("%s:%s", protocol.name, "local")},
 			Labels:    map[string]string{globalContainerLabel: "", label: ""},
 			BuildArgs: map[string]*string{"VERSION": &vers},
 		}
@@ -343,7 +343,7 @@ func buildImages(
 		vers := "0.0.0-local"
 		runtimeImage = docker.Image{
 			Path:      options.RuntimeBuildDir,
-			Tags:      []string{fmt.Sprintf("%s/%s:%s", strings.ToLower(kr.name), runtime.name, "local")},
+			Tags:      []string{fmt.Sprintf("%s:%s", runtime.name, "local")},
 			Labels:    map[string]string{globalContainerLabel: "", label: ""},
 			BuildArgs: map[string]*string{"VERSION": &vers},
 		}
