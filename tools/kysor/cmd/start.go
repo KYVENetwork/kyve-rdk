@@ -362,7 +362,7 @@ func buildImages(
 		runtimeImage = docker.Image{
 			Path: options.RuntimeBuildDir,
 			// TODO: should we use another name for the runtime image?
-			Tags:      []string{fmt.Sprintf("%s:%s", pool.Runtime, "local")},
+			Tags:      []string{fmt.Sprintf("%s:%s", strings.Replace(pool.Runtime, "@", "", -1), "local")},
 			Labels:    map[string]string{globalContainerLabel: "", label: ""},
 			BuildArgs: map[string]*string{"VERSION": &vers},
 		}
