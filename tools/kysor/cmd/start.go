@@ -96,37 +96,27 @@ type kyveRef struct {
 	name string
 }
 
-// getIntegrationVersions returns the required protocol and runtime versions for the given pool
+// getProtocolVersion returns the required protocol version for the given pool
 // protocol version: Latest patch version that is defined on-chain (ex: v1.1.0 -> v1.1.3)
-// runtime version: Latest version (no constraints) -> TODO: save constraints on-chain and use them
-func getIntegrationVersions(repo *git.Repository, pool *pooltypes.Pool, repoDir string, wantedProtocolVers *version.Version, wantedRuntimeVers *version.Version) (*kyveRef, *kyveRef, error) {
+func getProtocolVersion(repo *git.Repository, pool *pooltypes.Pool, repoDir string, wantedProtocolVers *version.Version) (*kyveRef, error) {
 	tagrefs, err := repo.Tags()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	protocolPrefix := "protocol/core@"
 
-	// TODO: after chain-upgrade 1.5.0, remove this and get the runtime from the pool
-	split := strings.Split(pool.Runtime, "@kyvejs/")
-	if len(split) != 2 {
-		return nil, nil, fmt.Errorf("invalid runtime name: %s", pool.Runtime)
-	}
-	expectedRuntimeDir := split[1]
-	runtimePrefix := fmt.Sprintf("runtime/%s@", expectedRuntimeDir)
-
 	pVersion, err := version.NewVersion(pool.Protocol.Version)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Protocol must be at least the same major and minor version as defined in the pool
 	protocolVersContraint, err := version.NewConstraint(fmt.Sprintf(">=%s, < %d.%d.0", pVersion.String(), pVersion.Segments()[0], pVersion.Segments()[1]+1))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	var latestRuntimeVersion *kyveRef
 	var latestProtocolVersion *kyveRef
 	err = tagrefs.ForEach(func(ref *plumbing.Reference) error {
 		if ref.Name().IsTag() && strings.HasPrefix(ref.Name().Short(), protocolPrefix) {
@@ -140,7 +130,45 @@ func getIntegrationVersions(repo *git.Repository, pool *pooltypes.Pool, repoDir 
 			} else {
 				latestProtocolVersion = getHigherVersion(latestProtocolVersion, ref, protocolPrefix, protocolVersContraint)
 			}
-		} else if ref.Name().IsTag() && strings.HasPrefix(ref.Name().Short(), runtimePrefix) {
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if latestProtocolVersion == nil {
+		if wantedProtocolVers != nil {
+			return nil, fmt.Errorf("no protocol found for %s%s", protocolPrefix, wantedProtocolVers)
+		}
+		return nil, fmt.Errorf("no protocol found for %s", protocolPrefix)
+	}
+
+	latestProtocolVersion.path = filepath.Join(repoDir, protocolPath)
+	latestProtocolVersion.name = "protocol-core"
+
+	return latestProtocolVersion, nil
+}
+
+// getRuntimeVersion returns the required runtime versions for the given pool
+// runtime version: Latest version (no constraints) -> TODO: save constraints on-chain and use them
+func getRuntimeVersion(repo *git.Repository, pool *pooltypes.Pool, repoDir string, wantedRuntimeVers *version.Version) (*kyveRef, error) {
+	tagrefs, err := repo.Tags()
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: after chain-upgrade 1.5.0, remove this and get the runtime from the pool
+	split := strings.Split(pool.Runtime, "@kyvejs/")
+	if len(split) != 2 {
+		return nil, fmt.Errorf("invalid runtime name: %s", pool.Runtime)
+	}
+	expectedRuntimeDir := split[1]
+	runtimePrefix := fmt.Sprintf("runtime/%s@", expectedRuntimeDir)
+
+	var latestRuntimeVersion *kyveRef
+	err = tagrefs.ForEach(func(ref *plumbing.Reference) error {
+		if ref.Name().IsTag() && strings.HasPrefix(ref.Name().Short(), runtimePrefix) {
 			if wantedRuntimeVers != nil {
 				if ref.Name().Short() == fmt.Sprintf("%s%s", runtimePrefix, wantedRuntimeVers.String()) {
 					latestRuntimeVersion = &kyveRef{
@@ -155,28 +183,20 @@ func getIntegrationVersions(repo *git.Repository, pool *pooltypes.Pool, repoDir 
 		return nil
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	if latestProtocolVersion == nil {
-		if wantedProtocolVers != nil {
-			return nil, nil, fmt.Errorf("no protocol found for %s%s", protocolPrefix, wantedProtocolVers)
-		}
-		return nil, nil, fmt.Errorf("no protocol found for %s", protocolPrefix)
-	}
 	if latestRuntimeVersion == nil {
 		if wantedRuntimeVers != nil {
-			return nil, nil, fmt.Errorf("no runtime found for %s%s", runtimePrefix, wantedRuntimeVers)
+			return nil, fmt.Errorf("no runtime found for %s%s", runtimePrefix, wantedRuntimeVers)
 		}
-		return nil, nil, fmt.Errorf("no runtime found for %s", runtimePrefix)
+		return nil, fmt.Errorf("no runtime found for %s", runtimePrefix)
 	}
 
-	latestProtocolVersion.path = filepath.Join(repoDir, protocolPath)
 	latestRuntimeVersion.path = filepath.Join(repoDir, runtimePath, expectedRuntimeDir)
-	latestProtocolVersion.name = "protocol-core"
 	latestRuntimeVersion.name = fmt.Sprintf("runtime-%s", expectedRuntimeDir)
 
-	return latestProtocolVersion, latestRuntimeVersion, nil
+	return latestRuntimeVersion, nil
 }
 
 type kyveRepo struct {
@@ -311,23 +331,21 @@ func buildImages(
 	var runtimeImage docker.Image
 	var runtimeRef *plumbing.Reference
 
-	// TODO: split runtime and protocol into separate functions
-	protocol, runtime, err := getIntegrationVersions(kr.repo, pool, kr.dir, options.ProtocolVersion, options.RuntimeVersion)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	if options.ProtocolBuildDir != "" {
 		// If protocolBuildDir is set, use it as the build directory
 		vers := "0.0.0-local"
 		protocolImage = docker.Image{
 			Path:      options.ProtocolBuildDir,
-			Tags:      []string{fmt.Sprintf("%s:%s", protocol.name, "local")},
+			Tags:      []string{fmt.Sprintf("%s:%s", "protocol-core", "local")},
 			Labels:    map[string]string{globalContainerLabel: "", label: ""},
 			BuildArgs: map[string]*string{"VERSION": &vers},
 		}
 	} else {
 		// Otherwise, use the version from the repository
+		protocol, err := getProtocolVersion(kr.repo, pool, kr.dir, options.ProtocolVersion)
+		if err != nil {
+			return nil, nil, err
+		}
 		protocolRef = protocol.ref
 		vers := protocol.ver.String()
 		protocolImage = docker.Image{
@@ -342,13 +360,18 @@ func buildImages(
 		// If runtimeBuildDir is set, use it as the build directory
 		vers := "0.0.0-local"
 		runtimeImage = docker.Image{
-			Path:      options.RuntimeBuildDir,
-			Tags:      []string{fmt.Sprintf("%s:%s", runtime.name, "local")},
+			Path: options.RuntimeBuildDir,
+			// TODO: should we use another name for the runtime image?
+			Tags:      []string{fmt.Sprintf("%s:%s", pool.Runtime, "local")},
 			Labels:    map[string]string{globalContainerLabel: "", label: ""},
 			BuildArgs: map[string]*string{"VERSION": &vers},
 		}
 	} else {
 		// Otherwise, use the version from the repository
+		runtime, err := getRuntimeVersion(kr.repo, pool, kr.dir, options.RuntimeVersion)
+		if err != nil {
+			return nil, nil, err
+		}
 		runtimeRef = runtime.ref
 		vers := runtime.ver.String()
 		runtimeImage = docker.Image{
@@ -623,7 +646,7 @@ func start(
 			fmt.Println("🔄  Auto update of docker containers are disabled")
 		} else {
 			fmt.Println("🔄  Auto update of docker containers are enabled")
-			go checkNewVersion(ctx, kyveClient, valConfig.Pool, repo, newVersionChan)
+			go checkNewVersion(ctx, options, kyveClient, valConfig.Pool, repo, newVersionChan)
 		}
 		fmt.Println()
 	}
@@ -633,8 +656,9 @@ func start(
 // checkNewVersion checks if a new version is available and sends a signal to the newVersionChan if it is
 // It also updates the local repository and pulls the latest changes
 // This function is blocking
-func checkNewVersion(ctx context.Context, kyveClient *chain.KyveClient, poolId uint64, kr *kyveRepo, newVersionChan chan interface{}) {
+func checkNewVersion(ctx context.Context, options AdvancedOptions, kyveClient *chain.KyveClient, poolId uint64, kr *kyveRepo, newVersionChan chan interface{}) {
 	var currentProtocol, currentRuntime *version.Version
+	var protocolRef, runtimeRef *kyveRef
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
@@ -651,19 +675,34 @@ func checkNewVersion(ctx context.Context, kyveClient *chain.KyveClient, poolId u
 			continue
 		}
 
-		protocolRef, runtimeRef, err := getIntegrationVersions(kr.repo, response.GetPool().Data, kr.dir, nil, nil)
-		if err != nil {
-			fmt.Println("failed to get runtime versions: ", err)
-			continue
-		}
-		if currentProtocol == nil {
-			currentProtocol = protocolRef.ver
-		}
-		if currentRuntime == nil {
-			currentRuntime = runtimeRef.ver
+		// Only check for new versions if the protocol is not custom
+		if !options.HasCustomProtocol() {
+			protocolRef, err = getProtocolVersion(kr.repo, response.GetPool().Data, kr.dir, currentProtocol)
+			if err != nil {
+				fmt.Println("failed to get protocol version: ", err)
+				continue
+			}
+
+			if currentProtocol == nil {
+				currentProtocol = protocolRef.ver
+			}
 		}
 
-		if protocolRef.ver.String() != currentProtocol.String() || runtimeRef.ver.String() != currentRuntime.String() {
+		// Only check for new versions if the runtime is not custom
+		if !options.HasCustomRuntime() {
+			runtimeRef, err = getRuntimeVersion(kr.repo, response.GetPool().Data, kr.dir, currentRuntime)
+			if err != nil {
+				fmt.Println("failed to get runtime version: ", err)
+				continue
+			}
+
+			if currentRuntime == nil {
+				currentRuntime = runtimeRef.ver
+			}
+		}
+
+		// If a new version is available, send a signal to the newVersionChan
+		if (protocolRef != nil && protocolRef.ver.String() != currentProtocol.String()) || runtimeRef != nil && runtimeRef.ver.String() != currentRuntime.String() {
 			newVersionChan <- nil
 		}
 
