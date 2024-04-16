@@ -1,7 +1,7 @@
 ################## Build Stage 1 ##################
 # Create a staging Docker image with build dependencies and compile the app
 #################  Build Stage 1 #################
-FROM node:lts AS build
+FROM --platform=linux/x86_64 node:lts AS build
 
 ARG VERSION
 
@@ -32,7 +32,7 @@ RUN yarn run build:binaries
 ################## Build Stage 2 ##################
 # Create a slim runtime image with only the necessary files for execution
 #################  Build Stage 2 #################
-FROM node:slim AS runtime
+FROM --platform=linux/x86_64 node:slim AS runtime
 
 # Set the working directory
 WORKDIR /usr/src/app

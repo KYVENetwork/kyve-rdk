@@ -21,5 +21,5 @@ format:
 
 docker-image:
 	@echo "🐳 Building Docker image..."
-	@docker build --platform linux/x86_64 -t $(DOCKER_IMAGE_NAME):$(VERSION) -f $(DOCKERFILE) --build-arg VERSION=$(VERSION) .
+	@docker build -t $(DOCKER_IMAGE_NAME):$(VERSION) -f $(DOCKERFILE) --build-arg VERSION=$(VERSION) .
 	@echo "✅ Completed Docker image build!"
