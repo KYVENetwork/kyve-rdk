@@ -1,12 +1,15 @@
 /* eslint-disable */
-import { ChannelCredentials, Client, makeGenericClientConstructor, Metadata } from "@grpc/grpc-js";
-import type {
-  CallOptions,
-  ClientOptions,
-  ClientUnaryCall,
-  handleUnaryCall,
-  ServiceError,
-  UntypedServiceImplementation,
+import {
+  type CallOptions,
+  ChannelCredentials,
+  Client,
+  type ClientOptions,
+  type ClientUnaryCall,
+  type handleUnaryCall,
+  makeGenericClientConstructor,
+  Metadata,
+  type ServiceError,
+  type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
 import Long from "long";
 import _m0 from "protobufjs/minimal";
