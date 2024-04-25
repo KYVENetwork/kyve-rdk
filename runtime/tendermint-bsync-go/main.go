@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/KYVENetwork/kyve-rdk/runtime/tendermint-bsync-go/server"
+	"github.com/KYVENetwork/kyve-rdk/runtime/tendermint-bsync-go/commands"
 )
 
+const RUNTIME_VERSION = "1.1.7"
+
 func main() {
-	server.StartServer()
+	commands.Execute()
 }

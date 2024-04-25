@@ -93,9 +93,15 @@ test-e2e:
 ###############################################################################
 
 build: ensure_version
-	@echo "🐳 Building docker image..."
+	@echo "⚙️  Building binary..."
 	go build -o build/$(BINARY_NAME) $(BUILD_FLAGS) .
 	@echo "✅ Completed binary build!"
+
+run:
+	./build/$(BINARY_NAME) start --port $(PORT) --debug $(DEBUG)
+
+serve: ensure_version
+	go run main.go start --port $(PORT) --debug $(DEBUG)
 
 ###############################################################################
 ### 							 	Docker 							 		###

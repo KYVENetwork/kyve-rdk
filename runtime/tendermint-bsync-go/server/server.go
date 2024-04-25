@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog"
 	"os"
 	"strconv"
 
@@ -19,6 +20,8 @@ import (
 
 type TendermintBsyncGoServer struct {
 	pb.RuntimeServiceServer
+	debug  bool
+	logger zerolog.Logger
 }
 
 type Config struct {
@@ -38,12 +41,16 @@ type BlockResponse struct {
 
 // GetRuntimeName returns the name of the runtime. Example "@kyvejs/tendermint"
 func (t *TendermintBsyncGoServer) GetRuntimeName(_ context.Context, _ *pb.GetRuntimeNameRequest) (*pb.GetRuntimeNameResponse, error) {
-	return &pb.GetRuntimeNameResponse{Name: "@kyvejs/tendermint-bsync"}, nil
+	t.logger.Info().Msg("GetRuntimeName")
+
+	return &pb.GetRuntimeNameResponse{Name: RuntimeName}, nil
 }
 
 // GetRuntimeVersion returns the version of the runtime. Example "1.2.0"
 func (t *TendermintBsyncGoServer) GetRuntimeVersion(_ context.Context, _ *pb.GetRuntimeVersionRequest) (*pb.GetRuntimeVersionResponse, error) {
-	return &pb.GetRuntimeVersionResponse{Version: "1.1.7"}, nil
+	t.logger.Info().Msg("GetRuntimeVersion")
+
+	return &pb.GetRuntimeVersionResponse{Version: RuntimeVersion}, nil
 }
 
 // ValidateSetConfig parses the raw runtime config found on pool, validates it and finally sets
@@ -53,9 +60,16 @@ func (t *TendermintBsyncGoServer) GetRuntimeVersion(_ context.Context, _ *pb.Get
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) ValidateSetConfig(_ context.Context, req *pb.ValidateSetConfigRequest) (*pb.ValidateSetConfigResponse, error) {
-	rawConfig := req.GetRawConfig()
+	t.logger.Info().Msg("ValidateSetConfig")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("raw_config", req.GetRawConfig()).
+			Msg("ValidateSetConfigRequest")
+	}
+
 	var config Config
-	err := json.Unmarshal([]byte(rawConfig), &config)
+	err := json.Unmarshal([]byte(req.GetRawConfig()), &config)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error unmarshalling rawConfig JSON string: %v", err)
 	}
@@ -83,6 +97,15 @@ func (t *TendermintBsyncGoServer) ValidateSetConfig(_ context.Context, req *pb.V
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) GetDataItem(_ context.Context, req *pb.GetDataItemRequest) (*pb.GetDataItemResponse, error) {
+	t.logger.Info().Msg("GetDataItem")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Str("key", req.GetKey()).
+			Msg("GetDataItemRequest")
+	}
+
 	var config Config
 	err := json.Unmarshal([]byte(req.GetConfig().GetSerializedConfig()), &config)
 	if err != nil {
@@ -101,8 +124,6 @@ func (t *TendermintBsyncGoServer) GetDataItem(_ context.Context, req *pb.GetData
 		return nil, status.Errorf(codes.Internal, "Error marshalling block to JSON: %v", err)
 	}
 
-	fmt.Println(string(value))
-
 	return &pb.GetDataItemResponse{DataItem: &pb.DataItem{Key: key, Value: value}}, nil
 }
 
@@ -114,13 +135,20 @@ func (t *TendermintBsyncGoServer) GetDataItem(_ context.Context, req *pb.GetData
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) PrevalidateDataItem(_ context.Context, req *pb.PrevalidateDataItemRequest) (*pb.PrevalidateDataItemResponse, error) {
+	t.logger.Info().Msg("PrevalidateDataItem")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Any("data_item", req.GetDataItem()).
+			Msg("PrevalidateDataItemRequest")
+	}
+
 	var config Config
 	err := json.Unmarshal([]byte(req.GetConfig().GetSerializedConfig()), &config)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error unmarshalling serializedConfig JSON string: %v", err)
 	}
-
-	fmt.Println(string(req.GetDataItem().GetValue()))
 
 	var itemValue TendermintBsyncGoItemValue
 	err = tmJson.Unmarshal(req.GetDataItem().GetValue(), &itemValue)
@@ -144,6 +172,15 @@ func (t *TendermintBsyncGoServer) PrevalidateDataItem(_ context.Context, req *pb
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) TransformDataItem(_ context.Context, req *pb.TransformDataItemRequest) (*pb.TransformDataItemResponse, error) {
+	t.logger.Info().Msg("TransformDataItem")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Any("data_item", req.GetDataItem()).
+			Msg("TransformDataItemRequest")
+	}
+
 	return &pb.TransformDataItemResponse{TransformedDataItem: req.GetDataItem()}, nil
 }
 
@@ -151,6 +188,16 @@ func (t *TendermintBsyncGoServer) TransformDataItem(_ context.Context, req *pb.T
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) ValidateDataItem(_ context.Context, req *pb.ValidateDataItemRequest) (*pb.ValidateDataItemResponse, error) {
+	t.logger.Info().Msg("ValidateDataItem")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Any("proposed_data_item", req.GetProposedDataItem()).
+			Any("validation_data_item", req.GetValidationDataItem()).
+			Msg("ValidateDataItemRequest")
+	}
+
 	if bytes.Equal(req.GetProposedDataItem().GetValue(), req.GetValidationDataItem().GetValue()) {
 		return &pb.ValidateDataItemResponse{Vote: bundlestypes.VOTE_TYPE_VALID}, nil
 	}
@@ -165,6 +212,15 @@ func (t *TendermintBsyncGoServer) ValidateDataItem(_ context.Context, req *pb.Va
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) SummarizeDataBundle(_ context.Context, req *pb.SummarizeDataBundleRequest) (*pb.SummarizeDataBundleResponse, error) {
+	t.logger.Info().Msg("SummarizeDataBundle")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Any("bundle", req.GetBundle()).
+			Msg("SummarizeDataBundleRequest")
+	}
+
 	bundle := req.GetBundle()
 	if len(bundle) == 0 {
 		return nil, status.Error(codes.Internal, "Bundle is empty")
@@ -177,6 +233,15 @@ func (t *TendermintBsyncGoServer) SummarizeDataBundle(_ context.Context, req *pb
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) NextKey(_ context.Context, req *pb.NextKeyRequest) (*pb.NextKeyResponse, error) {
+	t.logger.Info().Msg("NextKey")
+
+	if t.debug {
+		t.logger.Debug().
+			Str("config", req.GetConfig().GetSerializedConfig()).
+			Str("key", req.GetKey()).
+			Msg("NextKeyRequest")
+	}
+
 	key := req.GetKey()
 	parsedKey, err := strconv.Atoi(key)
 	if err != nil {
