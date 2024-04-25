@@ -10,7 +10,7 @@ import {
   parseEndpoints,
   parsePoolId,
   parseValaccount,
-} from "./commander";
+} from "./parser";
 import {
   archiveDebugBundle,
   canPropose,
@@ -188,6 +188,7 @@ export class Core {
         console.log(this.coreVersion);
       });
 
+    // define info command
     program
       .command("info")
       .description("Print information about the protocol core")
@@ -196,6 +197,32 @@ export class Core {
         console.log(`NodeJS version: ${process.version}`);
         console.log(`Platform: ${os.platform()}`);
         console.log(`Arch: ${os.arch()}`);
+      });
+
+    // define runtime-info command
+    program
+      .command("runtime-info")
+      .description("Print name and version of the runtime")
+      .option(
+        "--runtime-host <string>",
+        'The host of the runtime. By default "localhost", use "host.docker.internal" if you run core inside a docker container',
+        "localhost"
+      )
+      .option(
+        "--runtime-port <number>",
+        "The prot of the grpc runtime. By default 50051",
+        "50051"
+      )
+      .action(async (options) => {
+        this.runtime = new GrpcRuntime({
+          host: options.runtimeHost,
+          port: parseInt(options.runtimePort),
+        });
+
+        const name = await this.runtime.getName();
+        const version = await this.runtime.getVersion();
+
+        console.log(`${name} ${version}`);
       });
 
     // define start command
@@ -353,11 +380,6 @@ export class Core {
   }
 }
 
-// export commander
-export * from "./commander";
-
-// export types
+export * from "./parser";
 export * from "./types";
-
-// export utils
 export * from "./utils";

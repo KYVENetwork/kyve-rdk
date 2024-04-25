@@ -23,26 +23,24 @@ RUN yarn install
 # Copy source files
 COPY ./src ./src
 
-# Override the entrypoint to use the docker entrypoint
-COPY ./src/entrypoint_docker.ts ./src/entrypoint.ts
-
 # Build the docker core
-RUN yarn run build:binaries
+RUN yarn run build
 
 ################## Build Stage 2 ##################
-# Create a slim runtime image with only the necessary files for execution
+# Create a slim core image with only the necessary files for execution
 #################  Build Stage 2 #################
-FROM --platform=linux/x86_64 node:slim AS runtime
+FROM --platform=linux/x86_64 node:slim AS core
 
 # Set the working directory
 WORKDIR /usr/src/app
 
 # Copy the compiled output from the build stage
-COPY --from=build /usr/src/app/out/protocol ./
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules ./node_modules
 
 # Set the command to run when the container starts
 CMD /bin/bash -c "set -a; source .env &>0; set +a; \
-    ./protocol start \
+    node ./dist/src/index.js start \
     --pool \$POOL \
     --storage-priv \$STORAGE_PRIV \
     --request-backoff \$REQUEST_BACKOFF \
@@ -53,4 +51,6 @@ CMD /bin/bash -c "set -a; source .env &>0; set +a; \
     --chain-id \$CHAIN_ID \
     --rpc \$RPC \
     --rest \$REST \
+    --runtime-host "\$RUNTIME_HOST" \
+    --runtime-port "\$RUNTIME_PORT" \
     \$DEBUG"
