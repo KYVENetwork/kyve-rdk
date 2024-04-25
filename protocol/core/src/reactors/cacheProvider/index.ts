@@ -1,4 +1,4 @@
-import { ICacheProvider, Validator } from "../..";
+import { ICacheProvider, Core } from "../../core";
 import { JsonFileCache } from "./JsonFileCache";
 import { MemoryCache } from "./MemoryCache";
 
@@ -12,7 +12,7 @@ import { MemoryCache } from "./MemoryCache";
  * @method cacheProviderFactory
  * @return {ICacheProvider}
  */
-export function cacheProviderFactory(this: Validator): ICacheProvider {
+export function cacheProviderFactory(this: Core): ICacheProvider {
   switch (this.cache) {
     case "jsonfile":
       return new JsonFileCache();

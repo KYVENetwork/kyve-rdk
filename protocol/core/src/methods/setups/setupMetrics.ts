@@ -2,17 +2,17 @@ import http from "http";
 import prom_client, { register } from "prom-client";
 import url from "url";
 
-import { IMetrics, Validator, standardizeError } from "../..";
+import { IMetrics, Core, standardizeError } from "../../core";
 
 /**
  * setupMetrics initiates all metrics and starts if enabled a local prometheus
  * metrics server
  *
  * @method setupMetrics
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export function setupMetrics(this: Validator): void {
+export function setupMetrics(this: Core): void {
   try {
     // init metric parameters
     this.m = {} as IMetrics;

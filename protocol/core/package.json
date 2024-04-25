@@ -26,6 +26,7 @@
   "scripts": {
     "build": "rimraf dist && yarn format && tsc",
     "build:binaries": "yarn build && rimraf out && pkg package.json",
+    "start": "node ./dist/src/index.js",
     "test": "jest",
     "format": "prettier --write . --ignore-path ./.prettierignore",
     "doc": "typedoc"

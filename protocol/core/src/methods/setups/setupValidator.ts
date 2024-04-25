@@ -7,17 +7,17 @@ import {
 } from "unique-names-generator";
 import { major, minor, patch, prerelease } from "semver";
 
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * setupValidator ensures the node starts as a valid validator
  * and logs some basic validator starting information
  *
  * @method setupValidator
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function setupValidator(this: Validator): Promise<void> {
+export async function setupValidator(this: Core): Promise<void> {
   try {
     const name = await this.runtime.getName();
     const version = await this.runtime.getVersion();
@@ -29,7 +29,7 @@ export async function setupValidator(this: Validator): Promise<void> {
     this.logger.info(`Valaddress = ${this.client[0].account.address}\n`);
 
     this.logger.info(`${name} = v${version}`);
-    this.logger.info(`@kyvejs/protocol = v${this.protocolVersion}\n`);
+    this.logger.info(`@kyvejs/protocol = v${this.coreVersion}\n`);
 
     // A Valname is likea human readable hash  based on chainId, pool id,
     // runtime, runtime version and valaddress.

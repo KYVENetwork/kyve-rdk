@@ -1,4 +1,4 @@
-import { ICompression, Validator } from "../..";
+import { ICompression, Core } from "../../core";
 import { Gzip } from "./Gzip";
 import { NoCompression } from "./NoCompression";
 
@@ -13,7 +13,7 @@ import { NoCompression } from "./NoCompression";
  * @method compressionFactory
  * @return {ICompression}
  */
-export function compressionFactory(this: Validator): ICompression {
+export function compressionFactory(this: Core): ICompression {
   switch (this.pool.data?.current_compression_id ?? 0) {
     case 1:
       return new Gzip();

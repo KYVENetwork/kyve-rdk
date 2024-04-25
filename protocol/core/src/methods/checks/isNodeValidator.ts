@@ -1,4 +1,4 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * isNodeValidator checks if the staker of the node is in the
@@ -6,10 +6,10 @@ import { Validator, standardizeError } from "../..";
  * the node will exit.
  *
  * @method isNodeValidator
- * @param {Validator} this
+ * @param {Core} this
  * @return {boolean}
  */
-export function isNodeValidator(this: Validator): boolean {
+export function isNodeValidator(this: Core): boolean {
   try {
     this.logger.debug(
       `Validating if node operator is included in pool stakers`

@@ -12,7 +12,6 @@ import {
   type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
 import _m0 from "protobufjs/minimal";
-import { Struct } from "../../../google/protobuf/struct";
 import { VoteType, voteTypeFromJSON, voteTypeToJSON } from "../../../kyve/bundles/v1beta1/tx";
 
 export const protobufPackage = "kyverdk.runtime.v1";
@@ -25,7 +24,7 @@ export interface DataItem {
   /** The key of the data item */
   key: string;
   /** The value of the data item */
-  value?: { [key: string]: any } | undefined;
+  value: Uint8Array;
 }
 
 /** Configuration entity containing serialized info about connection to the respective chain */
@@ -241,7 +240,7 @@ export interface NextKeyResponse {
 }
 
 function createBaseDataItem(): DataItem {
-  return { key: "", value: undefined };
+  return { key: "", value: new Uint8Array(0) };
 }
 
 export const DataItem = {
@@ -249,8 +248,8 @@ export const DataItem = {
     if (message.key !== "") {
       writer.uint32(10).string(message.key);
     }
-    if (message.value !== undefined) {
-      Struct.encode(Struct.wrap(message.value), writer.uint32(18).fork()).ldelim();
+    if (message.value.length !== 0) {
+      writer.uint32(18).bytes(message.value);
     }
     return writer;
   },
@@ -274,7 +273,7 @@ export const DataItem = {
             break;
           }
 
-          message.value = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          message.value = reader.bytes();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -288,7 +287,7 @@ export const DataItem = {
   fromJSON(object: any): DataItem {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : "",
-      value: isObject(object.value) ? object.value : undefined,
+      value: isSet(object.value) ? bytesFromBase64(object.value) : new Uint8Array(0),
     };
   },
 
@@ -297,8 +296,8 @@ export const DataItem = {
     if (message.key !== "") {
       obj.key = message.key;
     }
-    if (message.value !== undefined) {
-      obj.value = message.value;
+    if (message.value.length !== 0) {
+      obj.value = base64FromBytes(message.value);
     }
     return obj;
   },
@@ -309,7 +308,7 @@ export const DataItem = {
   fromPartial<I extends Exact<DeepPartial<DataItem>, I>>(object: I): DataItem {
     const message = createBaseDataItem();
     message.key = object.key ?? "";
-    message.value = object.value ?? undefined;
+    message.value = object.value ?? new Uint8Array(0);
     return message;
   },
 };
@@ -1936,6 +1935,31 @@ export const RuntimeServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
+function bytesFromBase64(b64: string): Uint8Array {
+  if ((globalThis as any).Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  } else {
+    const bin = globalThis.atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; ++i) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  }
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  if ((globalThis as any).Buffer) {
+    return globalThis.Buffer.from(arr).toString("base64");
+  } else {
+    const bin: string[] = [];
+    arr.forEach((byte) => {
+      bin.push(globalThis.String.fromCharCode(byte));
+    });
+    return globalThis.btoa(bin.join(""));
+  }
+}
+
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
@@ -1947,10 +1971,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function isObject(value: any): boolean {
-  return typeof value === "object" && value !== null;
-}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

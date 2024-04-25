@@ -1,4 +1,4 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
 
 /**
@@ -9,13 +9,13 @@ import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
  * resulting in an unwanted vote.
  *
  * @method voteBundleProposal
- * @param {Validator} this
+ * @param {Core} this
  * @param {string} storageId storage id of the current bundle proposal
  * @param {number} vote can be 1 = VALID, 2 = INVALID or 3 = ABSTAIN
  * @return {Promise<boolean>}
  */
 export async function voteBundleProposal(
-  this: Validator,
+  this: Core,
   storageId: string,
   vote: number
 ): Promise<boolean> {

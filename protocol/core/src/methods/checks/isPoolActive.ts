@@ -1,16 +1,16 @@
 import { PoolStatus } from "@kyvejs/types/lcd/kyve/pool/v1beta1/pool";
 
-import { Validator } from "../..";
+import { Core } from "../../core";
 
 /**
  * isPoolActive checks if the pool is active or not.
  * It returns true or false, wether it is active or not.
  *
  * @method isPoolActive
- * @param {Validator} this
+ * @param {Core} this
  * @return {boolean}
  */
-export function isPoolActive(this: Validator): boolean {
+export function isPoolActive(this: Core): boolean {
   this.logger.debug(`Validating if pool is active: ${this.pool.status}`);
 
   switch (this.pool.status as PoolStatus) {

@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 
-export interface ProtocolConfig {
+export interface RuntimeConfig {
   host: string;
   port: number;
   channelOverride: grpc.Channel | undefined;

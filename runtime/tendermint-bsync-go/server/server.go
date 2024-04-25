@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"google.golang.org/protobuf/types/known/structpb"
 	"os"
 	"strconv"
 
@@ -44,7 +43,7 @@ func (t *TendermintBsyncGoServer) GetRuntimeName(_ context.Context, _ *pb.GetRun
 
 // GetRuntimeVersion returns the version of the runtime. Example "1.2.0"
 func (t *TendermintBsyncGoServer) GetRuntimeVersion(_ context.Context, _ *pb.GetRuntimeVersionRequest) (*pb.GetRuntimeVersionResponse, error) {
-	return &pb.GetRuntimeVersionResponse{Version: "1.1.8"}, nil
+	return &pb.GetRuntimeVersionResponse{Version: "1.1.7"}, nil
 }
 
 // ValidateSetConfig parses the raw runtime config found on pool, validates it and finally sets
@@ -92,31 +91,19 @@ func (t *TendermintBsyncGoServer) GetDataItem(_ context.Context, req *pb.GetData
 	key := req.GetKey()
 
 	blockHeightUrl := fmt.Sprintf("%s/block?height=%s", config.Rpc, key)
-	blockResponse, err := utils.GetFromUrl(blockHeightUrl)
+	blockResponse, err := utils.GetJsonFromUrl(blockHeightUrl)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error getting JSON from URL %s: %v", blockHeightUrl, err)
 	}
 
-	block := new(BlockResponse)
-	if err := tmJson.Unmarshal(blockResponse, &block); err != nil {
-		return nil, status.Errorf(codes.Internal, "Error unmarshalling block: %s", err)
-	}
-
-	parsedJson, err := tmJson.Marshal(block.Result.Block)
+	value, err := json.Marshal(blockResponse["result"].(map[string]interface{})["block"])
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error marshalling block result data: %v", err)
+		return nil, status.Errorf(codes.Internal, "Error marshalling block to JSON: %v", err)
 	}
 
-	var data map[string]interface{}
-	if err := json.Unmarshal(parsedJson, &data); err != nil {
-		return nil, status.Errorf(codes.Internal, "Error unmarshalling block: %s", err)
-	}
+	fmt.Println(string(value))
 
-	resultStruct, err := structpb.NewStruct(data)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error converting data to struct value: %s", err)
-	}
-	return &pb.GetDataItemResponse{DataItem: &pb.DataItem{Key: key, Value: resultStruct}}, nil
+	return &pb.GetDataItemResponse{DataItem: &pb.DataItem{Key: key, Value: value}}, nil
 }
 
 // PrevalidateDataItem prevalidates a data item right after it was retrieved from source.
@@ -133,13 +120,10 @@ func (t *TendermintBsyncGoServer) PrevalidateDataItem(_ context.Context, req *pb
 		return nil, status.Errorf(codes.Internal, "Error unmarshalling serializedConfig JSON string: %v", err)
 	}
 
-	value, err := req.GetDataItem().GetValue().MarshalJSON()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error converting struct to bytes: %v", err)
-	}
+	fmt.Println(string(req.GetDataItem().GetValue()))
 
 	var itemValue TendermintBsyncGoItemValue
-	err = tmJson.Unmarshal(value, &itemValue)
+	err = tmJson.Unmarshal(req.GetDataItem().GetValue(), &itemValue)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error unmarshalling data item: %v", err)
 	}
@@ -167,17 +151,7 @@ func (t *TendermintBsyncGoServer) TransformDataItem(_ context.Context, req *pb.T
 //
 // Deterministic behavior is required
 func (t *TendermintBsyncGoServer) ValidateDataItem(_ context.Context, req *pb.ValidateDataItemRequest) (*pb.ValidateDataItemResponse, error) {
-	proposedDataItemValue, err := req.GetProposedDataItem().GetValue().MarshalJSON()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error converting struct to bytes: %v", err)
-	}
-
-	validationDataItemValue, err := req.GetValidationDataItem().GetValue().MarshalJSON()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error converting struct to bytes: %v", err)
-	}
-
-	if bytes.Equal(proposedDataItemValue, validationDataItemValue) {
+	if bytes.Equal(req.GetProposedDataItem().GetValue(), req.GetValidationDataItem().GetValue()) {
 		return &pb.ValidateDataItemResponse{Vote: bundlestypes.VOTE_TYPE_VALID}, nil
 	}
 
@@ -196,15 +170,13 @@ func (t *TendermintBsyncGoServer) SummarizeDataBundle(_ context.Context, req *pb
 		return nil, status.Error(codes.Internal, "Bundle is empty")
 	}
 
-	fmt.Println(bundle)
-
 	return &pb.SummarizeDataBundleResponse{Summary: bundle[len(bundle)-1].Key}, nil
 }
 
 // NextKey gets the next key from the current key so that the data archived has an order.
 //
 // Deterministic behavior is required
-func (t *TendermintBsyncGoServer) NextKey(ctx context.Context, req *pb.NextKeyRequest) (*pb.NextKeyResponse, error) {
+func (t *TendermintBsyncGoServer) NextKey(_ context.Context, req *pb.NextKeyRequest) (*pb.NextKeyResponse, error) {
 	key := req.GetKey()
 	parsedKey, err := strconv.Atoi(key)
 	if err != nil {

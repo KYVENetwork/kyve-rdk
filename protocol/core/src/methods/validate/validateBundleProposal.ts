@@ -1,6 +1,6 @@
 import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
 
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { sha256, standardizeError } from "../../utils";
 
 /**
@@ -11,12 +11,12 @@ import { sha256, standardizeError } from "../../utils";
  * at the end.
  *
  * @method validateBundleProposal
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt
  * @return {Promise<boolean>} whether the validation was successful or has to be repeated
  */
 export async function validateBundleProposal(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<boolean> {
   try {

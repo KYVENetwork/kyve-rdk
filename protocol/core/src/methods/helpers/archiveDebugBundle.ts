@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, createWriteStream, readFileSync } from "fs";
 import path from "path";
-import { standardizeError, Validator } from "../..";
+import { standardizeError, Core } from "../../core";
 import JSZip from "jszip";
 import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
 import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
@@ -11,7 +11,7 @@ import Diff from "diff";
  * purposes if the validator voted with abstain or invalid
  *
  * @method archiveDebugBundle
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} vote type of the vote
  * @param {DataItem[]} proposedBundle the proposed bundle uploaded to the storage provider
  * @param {DataItem[]} validationBundle the local bundle from the node
@@ -19,7 +19,7 @@ import Diff from "diff";
  * @return {void}
  */
 export function archiveDebugBundle(
-  this: Validator,
+  this: Core,
   vote: number,
   proposedBundle: DataItem[],
   validationBundle: DataItem[],

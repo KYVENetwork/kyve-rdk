@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 
 /**
  * continueRound is only used for test purposes to allow easier unit testing.
@@ -6,9 +6,9 @@ import { Validator } from "../..";
  * of proposal rounds.
  *
  * @method continueRound
- * @param {Validator} this
+ * @param {Core} this
  * @return {boolean}
  */
-export function continueRound(this: Validator): boolean {
+export function continueRound(this: Core): boolean {
   return true;
 }

@@ -1,4 +1,4 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * claimUploaderRole tries to claim the uploader role for the next bundle proposal
@@ -8,10 +8,10 @@ import { Validator, standardizeError } from "../..";
  * node the tx will just be ignored.
  *
  * @method claimUploaderRole
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<boolean>}
  */
-export async function claimUploaderRole(this: Validator): Promise<boolean> {
+export async function claimUploaderRole(this: Core): Promise<boolean> {
   for (let c = 0; c < this.client.length; c++) {
     try {
       // if next uploader is already defined abort

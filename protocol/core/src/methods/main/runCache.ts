@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, sleep, standardizeError } from "../../utils";
 import clone from "clone";
 import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
@@ -25,10 +25,10 @@ import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
  * following round.
  *
  * @method runCache
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function runCache(this: Validator): Promise<void> {
+export async function runCache(this: Core): Promise<void> {
   // run rounds indefinitely, continueRound returns always
   // true and is only used by unit tests to control the termination of
   // rounds by mocking it

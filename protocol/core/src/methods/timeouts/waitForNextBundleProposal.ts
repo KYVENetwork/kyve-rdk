@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { REFRESH_TIME, sleep, standardizeError } from "../../utils";
 
 /**
@@ -9,12 +9,12 @@ import { REFRESH_TIME, sleep, standardizeError } from "../../utils";
  * the node knows someone submitted a new proposal.
  *
  * @method waitForNextBundleProposal
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt
  * @return {Promise<void>}
  */
 export async function waitForNextBundleProposal(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<void> {
   try {

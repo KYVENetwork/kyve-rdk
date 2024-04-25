@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import {
   callWithBackoffStrategy,
   REFRESH_TIME,
@@ -15,10 +15,10 @@ const INFINITY_LOOP = true;
  * After authorization the node can continue running.
  *
  * @method waitForAuthorization
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function waitForAuthorization(this: Validator): Promise<void> {
+export async function waitForAuthorization(this: Core): Promise<void> {
   try {
     const valaddress = this.client[0].account.address;
 

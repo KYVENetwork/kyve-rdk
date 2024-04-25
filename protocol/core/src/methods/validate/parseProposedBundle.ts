@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { bytesToBundle } from "../../utils";
 import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
 
@@ -8,12 +8,12 @@ import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
  * the original JSON format
  *
  * @method parseProposedBundle
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt
  * @return {Promise<DataItem[] | null>}
  */
 export async function parseProposedBundle(
-  this: Validator,
+  this: Core,
   storageProviderResult: Buffer
 ): Promise<DataItem[]> {
   // get current compression defined on pool

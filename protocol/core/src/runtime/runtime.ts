@@ -12,7 +12,7 @@ import {
   RuntimeServiceClient,
   DataItem,
 } from "../proto/kyverdk/runtime/v1/runtime";
-import { IRuntime, ProtocolConfig } from "../types";
+import { IRuntime, RuntimeConfig } from "../types";
 import { ClientOptions } from "@grpc/grpc-js";
 
 // config is a serialized string
@@ -24,16 +24,16 @@ export default class GrpcRuntime implements IRuntime {
 
   public config!: IConfig;
 
-  constructor(protocolConfig: Partial<ProtocolConfig>) {
+  constructor(runtimeConfig: Partial<RuntimeConfig>) {
     const options: Partial<ClientOptions> = {
       "grpc.max_send_message_length": maxMessageSize,
       "grpc.max_receive_message_length": maxMessageSize,
     };
-    if (protocolConfig.channelOverride !== undefined) {
-      options.channelOverride = protocolConfig.channelOverride;
+    if (runtimeConfig.channelOverride !== undefined) {
+      options.channelOverride = runtimeConfig.channelOverride;
     }
     this.grpcClient = new RuntimeServiceClient(
-      `${protocolConfig.host || "localhost"}:${protocolConfig.port || 50051}`,
+      `${runtimeConfig.host || "localhost"}:${runtimeConfig.port || 50051}`,
       grpc.credentials.createInsecure(),
       options
     );
@@ -110,7 +110,7 @@ export default class GrpcRuntime implements IRuntime {
 
             const responseDataItem: DataItem = {
               key: runtimeResponse.data_item.key,
-              value: JSON.parse(Buffer.from(runtimeResponse.data_item.value.buffer).toString()),
+              value: JSON.parse(runtimeResponse.data_item.value.toString()),
             };
             resolve(responseDataItem);
           }
@@ -170,7 +170,9 @@ export default class GrpcRuntime implements IRuntime {
 
             const responseDataItem: DataItem = {
               key: runtimeResponse.transformed_data_item.key,
-              value: JSON.parse(Buffer.from(runtimeResponse.transformed_data_item.value.buffer).toString()),
+              value: JSON.parse(
+                runtimeResponse.transformed_data_item.value.toString()
+              ),
             };
             resolve(responseDataItem);
           }

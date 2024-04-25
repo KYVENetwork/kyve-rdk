@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 
 import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, standardizeJSON } from "../../utils";
 import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
 
@@ -12,12 +12,12 @@ import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
  * with abstain and continues to try to load the bundle
  *
  * @method saveLoadValidationBundle
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt
  * @return {Promise<DataItem[] | null>}
  */
 export async function saveLoadValidationBundle(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<DataItem[] | null> {
   return await callWithBackoffStrategy(

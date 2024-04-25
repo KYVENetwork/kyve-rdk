@@ -1,14 +1,14 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * isValidRuntime checks if the runtime of the pool matches with the runtime of
  * the node. If it does not match the node will exit.
  *
  * @method isValidRuntime
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<boolean>}
  */
-export async function isValidRuntime(this: Validator): Promise<boolean> {
+export async function isValidRuntime(this: Core): Promise<boolean> {
   try {
     const name = await this.runtime.getName();
 

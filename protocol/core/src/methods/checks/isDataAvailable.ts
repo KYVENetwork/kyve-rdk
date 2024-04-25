@@ -1,4 +1,4 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * isDataAvailable checks if the current next data item
@@ -7,10 +7,10 @@ import { Validator, standardizeError } from "../..";
  * fails.
  *
  * @method isDataAvailable
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<boolean>}
  */
-export async function isDataAvailable(this: Validator): Promise<boolean> {
+export async function isDataAvailable(this: Core): Promise<boolean> {
   try {
     // log debug method
     if (this.pool.data!.current_key) {

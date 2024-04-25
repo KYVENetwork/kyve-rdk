@@ -1,4 +1,4 @@
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * skipUploaderRole is called by the current next uploader of the
@@ -14,12 +14,12 @@ import { Validator, standardizeError } from "../..";
  * proposal can start, thus resulting in an unwanted skip.
  *
  * @method skipUploaderRole
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} fromIndex
  * @return {Promise<boolean>}
  */
 export async function skipUploaderRole(
-  this: Validator,
+  this: Core,
   fromIndex: number
 ): Promise<boolean> {
   for (let c = 0; c < this.client.length; c++) {

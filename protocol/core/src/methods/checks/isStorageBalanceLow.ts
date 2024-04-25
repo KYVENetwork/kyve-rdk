@@ -1,15 +1,15 @@
 import BigNumber from "bignumber.js";
-import { Validator, standardizeJSON } from "../..";
+import { Core, standardizeJSON } from "../../core";
 
 /**
  * isStorageBalanceLow checks if the account of the storage provider
  * could pay for more than 10x of the current bundle size
  *
  * @method isStorageBalanceLow
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function isStorageBalanceLow(this: Validator): Promise<void> {
+export async function isStorageBalanceLow(this: Core): Promise<void> {
   try {
     this.logger.debug(`this.storageProviderFactory()`);
     const storageProvider = this.storageProviderFactory();

@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, standardizeError } from "../../utils";
 
 /**
@@ -7,14 +7,11 @@ import { callWithBackoffStrategy, standardizeError } from "../../utils";
  * It runs indefinitely until the query returns a valid response
  *
  * @method canVote
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt the last update time of the current bundle proposal
  * @return {Promise<boolean>}
  */
-export async function canVote(
-  this: Validator,
-  updatedAt: number
-): Promise<boolean> {
+export async function canVote(this: Core, updatedAt: number): Promise<boolean> {
   try {
     const canVote = await callWithBackoffStrategy(
       async () => {

@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, standardizeError } from "../../utils";
 
 /**
@@ -9,12 +9,12 @@ import { callWithBackoffStrategy, standardizeError } from "../../utils";
  * because without the newest state the node can't continue.
  *
  * @method syncPoolState
- * @param {Validator} this
+ * @param {Core} this
  * @param {boolean} exitOnConfigError exits if the config is invalid
  * @return {Promise<void>}
  */
 export async function syncPoolState(
-  this: Validator,
+  this: Core,
   exitOnConfigError: boolean = false
 ): Promise<void> {
   await callWithBackoffStrategy(

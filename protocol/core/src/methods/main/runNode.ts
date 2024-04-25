@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { IDLE_TIME, sleep } from "../../utils";
 
 /**
@@ -14,10 +14,10 @@ import { IDLE_TIME, sleep } from "../../utils";
  * stay in sync with the network.
  *
  * @method runNode
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function runNode(this: Validator): Promise<void> {
+export async function runNode(this: Core): Promise<void> {
   // run rounds indefinitely, continueRound returns always
   // true and is only used by unit tests to control the termination of
   // rounds by mocking it

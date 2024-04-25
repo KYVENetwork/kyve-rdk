@@ -1,5 +1,5 @@
 import { gunzipSync, gzipSync } from "zlib";
-import { MAX_COMPRESSION_BYTE_SIZE } from "../..";
+import { MAX_COMPRESSION_BYTE_SIZE } from "../../core";
 
 import { ICompression } from "../../types";
 

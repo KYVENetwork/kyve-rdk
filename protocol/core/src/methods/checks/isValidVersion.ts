@@ -1,4 +1,4 @@
-import { Validator, standardizeJSON } from "../..";
+import { Core, standardizeJSON } from "../../core";
 import { valid, major, minor, patch, prerelease } from "semver";
 
 /**
@@ -6,10 +6,10 @@ import { valid, major, minor, patch, prerelease } from "semver";
  * with the runtime version of the node. If it does not match the node will exit.
  *
  * @method isValidVersion
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<boolean>}
  */
-export async function isValidVersion(this: Validator): Promise<boolean> {
+export async function isValidVersion(this: Core): Promise<boolean> {
   try {
     const remoteVersion = valid(this.pool.data!.protocol!.version);
 

@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * getBalancesForMetrics tries to retrieve the $KYVE balance of the staker account, the $KYVE
@@ -8,10 +8,10 @@ import { Validator, standardizeError } from "../..";
  * can be of any currency for metrics
  *
  * @method getBalancesForMetrics
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function getBalancesForMetrics(this: Validator): Promise<void> {
+export async function getBalancesForMetrics(this: Core): Promise<void> {
   for (let c = 0; c < this.client.length; c++) {
     try {
       this.logger.debug(this.rpc[c]);

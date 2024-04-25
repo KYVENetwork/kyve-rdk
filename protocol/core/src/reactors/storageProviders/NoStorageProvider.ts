@@ -1,4 +1,4 @@
-import { sha256 } from "../..";
+import { sha256 } from "../../core";
 import { BundleTag, IStorageProvider } from "../../types";
 
 export class NoStorageProvider implements IStorageProvider {

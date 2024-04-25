@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, sleep, standardizeError } from "../../utils";
 
 const INFINITY_LOOP = true;
@@ -9,12 +9,12 @@ const INFINITY_LOOP = true;
  * It runs indefinitely until the query returns a valid response
  *
  * @method canPropose
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt the last update time of the current bundle proposal
  * @return {Promise<boolean>}
  */
 export async function canPropose(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<boolean> {
   try {

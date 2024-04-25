@@ -1,15 +1,15 @@
 import BigNumber from "bignumber.js";
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * isStorageBalanceZero checks if the account of the storage provider
  * has more than 0$ funds available
  *
  * @method isStorageBalanceZero
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<boolean>}
  */
-export async function isStorageBalanceZero(this: Validator): Promise<boolean> {
+export async function isStorageBalanceZero(this: Core): Promise<boolean> {
   try {
     this.logger.debug(`this.storageProviderFactory()`);
     const storageProvider = this.storageProviderFactory();

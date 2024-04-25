@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { BundleTag } from "../../types";
 import {
   bundleToBytes,
@@ -20,10 +20,10 @@ import { DataItem } from "../../proto/kyverdk/runtime/v1/runtime";
  * to prevent slashes.
  *
  * @method createBundleProposal
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function createBundleProposal(this: Validator): Promise<void> {
+export async function createBundleProposal(this: Core): Promise<void> {
   try {
     this.logger.info(
       `Creating a new bundle proposal for the next bundle proposal round`
@@ -162,7 +162,7 @@ export async function createBundleProposal(this: Validator): Promise<void> {
       },
       {
         name: "@kyvejs/protocol",
-        value: this.protocolVersion,
+        value: this.coreVersion,
       },
       {
         name: name,

@@ -1,15 +1,15 @@
 import KyveSDK from "@kyvejs/sdk";
-import { Validator, standardizeError } from "../..";
+import { Core, standardizeError } from "../../core";
 
 /**
  * setupSDK creates the main KYVE SDK and the client which is used for transactions
  * and the lcd client which is used for queries
  *
  * @method setupSDK
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
-export async function setupSDK(this: Validator): Promise<void> {
+export async function setupSDK(this: Core): Promise<void> {
   try {
     this.logger.debug(`Initializing KyveSDK with chain ID ${this.chainId}`);
 

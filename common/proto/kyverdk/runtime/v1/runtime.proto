@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package kyverdk.runtime.v1;
 
-import "google/protobuf/struct.proto";
 import "kyve/bundles/v1beta1/tx.proto";
 
 option go_package = "github.com/KYVENetwork/kyve-rdk/kyverdk/runtime/v1";
@@ -91,7 +90,7 @@ message DataItem {
   // The key of the data item
   string key = 1;
   // The value of the data item
-  google.protobuf.Struct value = 2;
+  bytes value = 2;
 }
 
 /* Configuration entity containing serialized info about connection to the respective chain */

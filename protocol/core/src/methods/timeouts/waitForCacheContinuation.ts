@@ -1,4 +1,4 @@
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { sleep } from "../../utils";
 
 /**
@@ -8,11 +8,11 @@ import { sleep } from "../../utils";
  * so we only listen here
  *
  * @method waitForCacheContinuation
- * @param {Validator} this
+ * @param {Core} this
  * @return {Promise<void>}
  */
 export async function waitForCacheContinuation(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<void> {
   // continue if a different proposal is available

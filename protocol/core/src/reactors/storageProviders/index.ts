@@ -1,4 +1,4 @@
-import { IStorageProvider, Validator } from "../..";
+import { IStorageProvider, Core } from "../../core";
 import { Arweave } from "./Arweave";
 import { Bundlr } from "./Bundlr";
 import { Kyve } from "./Kyve";
@@ -19,7 +19,7 @@ import { NoStorageProvider } from "./NoStorageProvider";
  * @method storageProviderFactory
  * @return {IStorageProvider}
  */
-export function storageProviderFactory(this: Validator): IStorageProvider {
+export function storageProviderFactory(this: Core): IStorageProvider {
   switch (this.pool.data?.current_storage_provider_id ?? 0) {
     case 1:
       return new Arweave(this.storagePriv);

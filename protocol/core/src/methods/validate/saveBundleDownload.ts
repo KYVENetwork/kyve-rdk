@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 
 import { VoteType } from "@kyvejs/types/client/kyve/bundles/v1beta1/tx";
-import { Validator } from "../..";
+import { Core } from "../../core";
 import { callWithBackoffStrategy, standardizeError } from "../../utils";
 
 /**
@@ -16,12 +16,12 @@ import { callWithBackoffStrategy, standardizeError } from "../../utils";
  * the bundle.
  *
  * @method saveBundleDownload
- * @param {Validator} this
+ * @param {Core} this
  * @param {number} updatedAt
  * @return {Promise<Buffer | null>}
  */
 export async function saveBundleDownload(
-  this: Validator,
+  this: Core,
   updatedAt: number
 ): Promise<Buffer | null> {
   return await callWithBackoffStrategy(
