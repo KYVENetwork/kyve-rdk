@@ -50,15 +50,6 @@ ldflags := $(strip $(ldflags))
 BUILD_FLAGS := -ldflags '$(ldflags)'
 
 ###############################################################################
-###                                 Checks                                  ###
-###############################################################################
-
-ensure_version:
-ifneq ($(GO_VERSION),1.22)
-	$(error ❌  Please run Go v1.22.x..)
-endif
-
-###############################################################################
 ###                          Formatting & Linting                           ###
 ###############################################################################
 
@@ -79,17 +70,17 @@ lint:
 ###  						    Binary building  						    ###
 ###############################################################################
 
-build: ensure_version
+build:
 	@echo "🏗️  Building binary..."
 	go build -o build/$(BINARY_NAME) $(BUILD_FLAGS) .
 	@echo "✅ Completed binary build!"
 
-install: ensure_version
+install:
 	@echo "🏗️  Installing binary..."
 	go install $(BUILD_FLAGS) .
 	@echo "✅ Completed binary install!"
 
-release: ensure_version
+release:
 	@echo "🏗️  Building release binaries..."
 	@rm -rf release
 	@mkdir release
