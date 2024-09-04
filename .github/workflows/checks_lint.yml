@@ -1,0 +1,33 @@
+name: Lint check
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      npm_config_user: "root"
+    steps:
+      # Checkout the repository
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      # Setup Golang
+      - name: 🐿 Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'tools/kysor/go.mod'
+          cache-dependency-path: 'tools/kysor/go.sum'
+      # Install nodejs
+      - name: Install nodejs
+        uses: actions/setup-node@v4
+      # Install yarn
+      - name: Install yarn
+        run: npm install --global yarn
+      # Run yarn install
+      - name: Run yarn install
+        run: yarn install
+        working-directory: protocol/core
+      # Lint all modules and packages
+      - name: Lint all
+        run: make lint

@@ -1,0 +1,6 @@
+.idea
+**/out
+
+# Ignore source files not needed to build released binaries
+kystrap.sh
+README.md

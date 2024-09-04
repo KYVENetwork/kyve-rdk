@@ -1,0 +1,11 @@
+name: Check all
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    uses: ./.github/workflows/checks_lint.yml
+
+  build-docker-images:
+    uses: ./.github/workflows/checks_build-docker-images.yml

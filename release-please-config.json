@@ -1,0 +1,42 @@
+{
+  "include-component-in-tag": true,
+  "include-v-in-tag": false,
+  "packages": {
+    "common/goutils": {
+      "package-name": "common/goutils",
+      "release-type": "go"
+    },
+    "protocol/core": {
+      "initial-version": "2.0.0",
+      "package-name": "protocol/core",
+      "release-type": "node"
+    },
+    "runtime/tendermint": {
+      "initial-version": "2.0.0",
+      "package-name": "runtime/tendermint",
+      "release-type": "node"
+    },
+    "runtime/tendermint-bsync": {
+      "initial-version": "2.0.0",
+      "package-name": "runtime/tendermint-bsync",
+      "release-type": "node"
+    },
+    "runtime/tendermint-ssync": {
+      "initial-version": "2.0.0",
+      "package-name": "runtime/tendermint-ssync",
+      "release-type": "node"
+    },
+    "tools/kysor": {
+      "initial-version": "2.0.0",
+      "package-name": "tools/kysor",
+      "release-type": "go",
+      "separate-pull-requests": true,
+      "skip-github-release": true
+    },
+    "tools/kystrap": {
+      "package-name": "tools/kystrap",
+      "release-type": "go"
+    }
+  },
+  "tag-separator": "@"
+}
